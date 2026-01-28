@@ -12,7 +12,8 @@
       "reactCompiler": true
     },
     "plugins": [
-      "@bacons/apple-colors"
+      "@bacons/apple-colors",
+      "@react-native-community/datetimepicker"
     ]
   }
 }

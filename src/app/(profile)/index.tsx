@@ -1,7 +1,8 @@
-import { ScrollView, Text, View, Pressable, TextInput, Platform } from "react-native";
+import { ScrollView, Text, View, Pressable, TextInput, Platform, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useState, useEffect } from "react";
 import * as AC from "@bacons/apple-colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface UserProfile {
   birthDate: string;
@@ -25,6 +26,9 @@ export default function ProfileRoute() {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
+  const [showBirthTimePicker, setShowBirthTimePicker] = useState(false);
+  const [showPeriodDatePicker, setShowPeriodDatePicker] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -61,12 +65,58 @@ export default function ProfileRoute() {
     });
   };
 
+  const handleBirthDateChange = (event: any, selectedDate?: Date) => {
+    setShowBirthDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setProfile({ ...profile, birthDate: selectedDate.toISOString().split("T")[0] });
+    }
+  };
+
+  const handleBirthTimeChange = (event: any, selectedTime?: Date) => {
+    setShowBirthTimePicker(Platform.OS === "ios");
+    if (selectedTime) {
+      const hours = selectedTime.getHours().toString().padStart(2, "0");
+      const minutes = selectedTime.getMinutes().toString().padStart(2, "0");
+      setProfile({ ...profile, birthTime: `${hours}:${minutes}` });
+    }
+  };
+
+  const handlePeriodDateChange = (event: any, selectedDate?: Date) => {
+    setShowPeriodDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setProfile({ ...profile, lastPeriodStart: selectedDate.toISOString().split("T")[0] });
+    }
+  };
+
+  const getBirthDate = () => {
+    return profile.birthDate ? new Date(profile.birthDate) : new Date();
+  };
+
+  const getBirthTime = () => {
+    const [hours, minutes] = profile.birthTime.split(":");
+    const date = new Date();
+    date.setHours(parseInt(hours) || 12);
+    date.setMinutes(parseInt(minutes) || 0);
+    return date;
+  };
+
+  const getPeriodDate = () => {
+    return profile.lastPeriodStart ? new Date(profile.lastPeriodStart) : new Date();
+  };
+
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
+      keyboardVerticalOffset={100}
     >
-      <View style={{ padding: 20, gap: 24 }}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentInsetAdjustmentBehavior="automatic"
+          style={{ flex: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={{ padding: 20, gap: 24 }}>
         {/* Header */}
         <View style={{ gap: 8 }}>
           <Text style={{ fontSize: 28, fontWeight: "700", color: AC.label }}>
@@ -96,19 +146,29 @@ export default function ProfileRoute() {
               Birth Date
             </Text>
             {isEditing ? (
-              <TextInput
-                style={{
-                  padding: 12,
-                  borderRadius: 10,
-                  backgroundColor: AC.tertiarySystemBackground,
-                  color: AC.label,
-                  fontSize: 16,
-                }}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={AC.placeholderText}
-                value={profile.birthDate}
-                onChangeText={(text) => setProfile({ ...profile, birthDate: text })}
-              />
+              <>
+                <Pressable
+                  onPress={() => setShowBirthDatePicker(true)}
+                  style={{
+                    padding: 12,
+                    borderRadius: 10,
+                    backgroundColor: AC.tertiarySystemBackground,
+                  }}
+                >
+                  <Text style={{ color: profile.birthDate ? AC.label : AC.placeholderText, fontSize: 16 }}>
+                    {profile.birthDate ? formatDate(profile.birthDate) : "Select birth date"}
+                  </Text>
+                </Pressable>
+                {showBirthDatePicker && (
+                  <DateTimePicker
+                    value={getBirthDate()}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleBirthDateChange}
+                    maximumDate={new Date()}
+                  />
+                )}
+              </>
             ) : (
               <Text style={{ fontSize: 16, color: AC.secondaryLabel }}>
                 {formatDate(profile.birthDate)}
@@ -121,19 +181,29 @@ export default function ProfileRoute() {
               Birth Time
             </Text>
             {isEditing ? (
-              <TextInput
-                style={{
-                  padding: 12,
-                  borderRadius: 10,
-                  backgroundColor: AC.tertiarySystemBackground,
-                  color: AC.label,
-                  fontSize: 16,
-                }}
-                placeholder="HH:MM (24-hour format)"
-                placeholderTextColor={AC.placeholderText}
-                value={profile.birthTime}
-                onChangeText={(text) => setProfile({ ...profile, birthTime: text })}
-              />
+              <>
+                <Pressable
+                  onPress={() => setShowBirthTimePicker(true)}
+                  style={{
+                    padding: 12,
+                    borderRadius: 10,
+                    backgroundColor: AC.tertiarySystemBackground,
+                  }}
+                >
+                  <Text style={{ color: AC.label, fontSize: 16 }}>
+                    {profile.birthTime}
+                  </Text>
+                </Pressable>
+                {showBirthTimePicker && (
+                  <DateTimePicker
+                    value={getBirthTime()}
+                    mode="time"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleBirthTimeChange}
+                    is24Hour={true}
+                  />
+                )}
+              </>
             ) : (
               <Text style={{ fontSize: 16, color: AC.secondaryLabel }}>
                 {profile.birthTime}
@@ -158,6 +228,7 @@ export default function ProfileRoute() {
                 placeholderTextColor={AC.placeholderText}
                 value={profile.birthPlace}
                 onChangeText={(text) => setProfile({ ...profile, birthPlace: text })}
+                returnKeyType="next"
               />
             ) : (
               <Text style={{ fontSize: 16, color: AC.secondaryLabel }}>
@@ -185,7 +256,8 @@ export default function ProfileRoute() {
                 onChangeText={(text) =>
                   setProfile({ ...profile, latitude: parseFloat(text) || 0 })
                 }
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
+                returnKeyType="next"
               />
 
               <Text style={{ fontSize: 14, fontWeight: "500", color: AC.label }}>
@@ -205,7 +277,8 @@ export default function ProfileRoute() {
                 onChangeText={(text) =>
                   setProfile({ ...profile, longitude: parseFloat(text) || 0 })
                 }
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
+                returnKeyType="done"
               />
             </View>
           )}
@@ -230,21 +303,29 @@ export default function ProfileRoute() {
               Last Period Start Date
             </Text>
             {isEditing ? (
-              <TextInput
-                style={{
-                  padding: 12,
-                  borderRadius: 10,
-                  backgroundColor: AC.tertiarySystemBackground,
-                  color: AC.label,
-                  fontSize: 16,
-                }}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={AC.placeholderText}
-                value={profile.lastPeriodStart}
-                onChangeText={(text) =>
-                  setProfile({ ...profile, lastPeriodStart: text })
-                }
-              />
+              <>
+                <Pressable
+                  onPress={() => setShowPeriodDatePicker(true)}
+                  style={{
+                    padding: 12,
+                    borderRadius: 10,
+                    backgroundColor: AC.tertiarySystemBackground,
+                  }}
+                >
+                  <Text style={{ color: profile.lastPeriodStart ? AC.label : AC.placeholderText, fontSize: 16 }}>
+                    {profile.lastPeriodStart ? formatDate(profile.lastPeriodStart) : "Select last period date"}
+                  </Text>
+                </Pressable>
+                {showPeriodDatePicker && (
+                  <DateTimePicker
+                    value={getPeriodDate()}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handlePeriodDateChange}
+                    maximumDate={new Date()}
+                  />
+                )}
+              </>
             ) : (
               <Text style={{ fontSize: 16, color: AC.secondaryLabel }}>
                 {formatDate(profile.lastPeriodStart)}
@@ -272,6 +353,7 @@ export default function ProfileRoute() {
                   setProfile({ ...profile, cycleLength: parseInt(text) || 28 })
                 }
                 keyboardType="number-pad"
+                returnKeyType="done"
               />
             ) : (
               <Text style={{ fontSize: 16, color: AC.secondaryLabel }}>
@@ -328,7 +410,9 @@ export default function ProfileRoute() {
             astrological calculations. This data is stored locally on your device.
           </Text>
         </View>
-      </View>
-    </ScrollView>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
