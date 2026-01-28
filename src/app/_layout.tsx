@@ -35,38 +35,38 @@ export default function Layout() {
           <WebTabs.Screen
             name="(index)"
             options={{
-              title: "Home",
-              tabBarIcon: (props) => <MaterialIcons {...props} name="home" />,
+              title: "Track",
+              tabBarIcon: (props) => <MaterialIcons {...props} name="add-circle" />,
             }}
           />
           <WebTabs.Screen
             name="(info)"
             options={{
-              title: "Info",
-              tabBarIcon: (props) => <MaterialIcons {...props} name="info" />,
+              title: "Calendar",
+              tabBarIcon: (props) => <MaterialIcons {...props} name="calendar-today" />,
             }}
           />
         </WebTabs>
       ) : (
         <NativeTabs>
           <NativeTabs.Trigger name="(index)">
-            <Label>Home</Label>
+            <Label>Track</Label>
             <Icon
               {...Platform.select({
-                ios: { sf: { default: "house", selected: "house.fill" } },
+                ios: { sf: { default: "plus.circle", selected: "plus.circle.fill" } },
                 default: {
-                  src: <VectorIcon family={MaterialIcons} name="home" />,
+                  src: <VectorIcon family={MaterialIcons} name="add-circle" />,
                 },
               })}
             />
           </NativeTabs.Trigger>
           <NativeTabs.Trigger name="(info)">
-            <Label>Info</Label>
+            <Label>Calendar</Label>
             <Icon
               {...Platform.select({
-                ios: { sf: "cursorarrow.rays" },
+                ios: { sf: { default: "calendar", selected: "calendar" } },
                 default: {
-                  src: <VectorIcon family={MaterialIcons} name="info" />,
+                  src: <VectorIcon family={MaterialIcons} name="calendar-today" />,
                 },
               })}
             />
