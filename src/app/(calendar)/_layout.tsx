@@ -34,7 +34,7 @@ const AppleStackPreset: NativeStackNavigationOptions =
 export default function Layout() {
   return (
     <Stack screenOptions={AppleStackPreset}>
-      <Stack.Screen name="index" options={{ title: "Today" }} />
+      <Stack.Screen name="index" options={{ title: "Cycle Calendar" }} />
     </Stack>
   );
 }

@@ -35,38 +35,56 @@ export default function Layout() {
           <WebTabs.Screen
             name="(index)"
             options={{
-              title: "Track",
-              tabBarIcon: (props) => <MaterialIcons {...props} name="add-circle" />,
+              title: "Today",
+              tabBarIcon: (props) => <MaterialIcons {...props} name="today" />,
             }}
           />
           <WebTabs.Screen
-            name="(info)"
+            name="(calendar)"
             options={{
               title: "Calendar",
               tabBarIcon: (props) => <MaterialIcons {...props} name="calendar-today" />,
+            }}
+          />
+          <WebTabs.Screen
+            name="(profile)"
+            options={{
+              title: "Profile",
+              tabBarIcon: (props) => <MaterialIcons {...props} name="person" />,
             }}
           />
         </WebTabs>
       ) : (
         <NativeTabs>
           <NativeTabs.Trigger name="(index)">
-            <Label>Track</Label>
+            <Label>Today</Label>
             <Icon
               {...Platform.select({
-                ios: { sf: { default: "plus.circle", selected: "plus.circle.fill" } },
+                ios: { sf: { default: "sun.max", selected: "sun.max.fill" } },
                 default: {
-                  src: <VectorIcon family={MaterialIcons} name="add-circle" />,
+                  src: <VectorIcon family={MaterialIcons} name="today" />,
                 },
               })}
             />
           </NativeTabs.Trigger>
-          <NativeTabs.Trigger name="(info)">
+          <NativeTabs.Trigger name="(calendar)">
             <Label>Calendar</Label>
             <Icon
               {...Platform.select({
                 ios: { sf: { default: "calendar", selected: "calendar" } },
                 default: {
                   src: <VectorIcon family={MaterialIcons} name="calendar-today" />,
+                },
+              })}
+            />
+          </NativeTabs.Trigger>
+          <NativeTabs.Trigger name="(profile)">
+            <Label>Profile</Label>
+            <Icon
+              {...Platform.select({
+                ios: { sf: { default: "person", selected: "person.fill" } },
+                default: {
+                  src: <VectorIcon family={MaterialIcons} name="person" />,
                 },
               })}
             />
